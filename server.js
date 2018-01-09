@@ -8,6 +8,7 @@ let storedFeedbacks =fs.readFileSync('./data/feedback.json','utf8');
 storedFeedbacks = JSON.parse(storedFeedbacks);
 let registered_users =[{userName:'rahul', name:'Rahul'},
                        {userName:'vish', name:'Vishal'}];
+let currentUser=undefined;
 
 let toS = o=>JSON.stringify(o,null,2);
 
@@ -43,14 +44,18 @@ let getContentType=function(file){
 
 let displayPage = function(req,res){
   let url= req.url=='/' ? '/index.html' : req.url;
-  console.log(url);
   let file='./public'+url;
   fs.readFile(file,(err,data)=>{
     if(data){
       res.setHeader('Content-Type',getContentType(url));
       res.write(data);
-      if(url=='/guestBook.html') displayComments(res);
+      if(url=='/guestBook.html') {
+        res.write(`<h2>logged in user is:${currentUser}</h2>`);
+        displayComments(res);
+      }
       res.end();
+    }else{
+      handleError(res);
     }
   })
 }
@@ -61,14 +66,17 @@ let displayComments=function(res){
               <br><b>comment:</b> ${feedback.coment}
               <br><b>Date:</b>  ${feedback.date}</p>`);
   })
-  res.write(`<a href="index.html">Home</a>`)
+  res.write(`<h1><a href="index.html">Home</a></h1>`);
   res.end();
+}
+
+let displayUserName=function(res){
+  res.write(currentUser);
 }
 
 let app = WebApp.create();
 app.use(logRequest);
 app.use(loadUser);
-
 
 let handleError = function(res) {
   res.write("NOT FOUND");
@@ -81,6 +89,9 @@ let servePage=function(req,res){
   app.get(req.url,(req,res)=>{
     if(!req.cookies.sessionid && req.url=='/guestBook.html'){
       displayComments(res);
+      return;
+    } else if(req.cookies.sessionid && req.url=='/login.html'){
+      res.redirect('/index.html');
       return;
     }
     displayPage(req,res);
@@ -97,6 +108,7 @@ let servePage=function(req,res){
     let sessionid = new Date().getTime();
     res.setHeader('Set-Cookie',`sessionid=${sessionid}`);
     user.sessionid = sessionid;
+    currentUser=req.body.userName;
     displayPage(req,res);
   });
 
@@ -114,7 +126,7 @@ let servePage=function(req,res){
       return;
     }
   res.setHeader('Set-Cookie',[`logInFailed=false; Expires=${new Date(1).toUTCString()}`,`sessionid=0; Expires=${new Date(1).toUTCString()}`]);
-  res.redirect('/login.html');
+  displayPage(req,res);
   });
 }
 
