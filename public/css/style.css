@@ -1,0 +1,89 @@
+body{
+  /*margin:top right bottom left*/
+  margin: 50px 100px 50px 100px;
+}
+
+h1{
+  font-size: 60px;
+}
+
+button{
+  font-size: 25px;
+}
+
+.header{
+  height: 10%;
+  width: 100%;
+  border-bottom: 1px solid brown;
+  text-align: center;
+  font-size: 40px;
+  color: orange;
+}
+
+.parent{
+  height: 90%;
+  width: 100%;
+}
+
+.image{
+  margin-top: 10px;
+  float: left;
+  height: 100%;
+  width: 70%;
+}
+
+.flowerLinks{
+  margin-top: 200px;
+  float: right;
+  height: 100%;
+  width: 30%;
+  font-size:25px;
+}
+
+.gif{
+  margin-left: 1200px;
+}
+
+.guestBook{
+  font-size:25px;
+}
+
+.abeliophyllum{
+  float: left;
+  width: 620px;
+  margin-top: 10px;
+}
+
+.agerantum{
+  float: left;
+  width: 820px;
+  margin-top: 10px;
+}
+
+.abeliophyllumData{
+  width: 900px;
+  margin-left: 500px;
+  margin-top: 400px;
+  font-size: 18px;
+}
+
+.agerantumData{
+  width: 900px;
+  margin-left: 500px;
+  margin-top: 280px;
+  font-size: 18px;
+}
+
+.feedback{
+  font-size: 25px;
+}
+
+#name{
+  width: 200px;
+  height: 20px;
+}
+
+#entry{
+  border-top: 2px solid Black;
+  font-size: 30px;
+}
