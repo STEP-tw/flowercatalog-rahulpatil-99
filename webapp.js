@@ -64,16 +64,6 @@ const main = function(req,res){
     });
     if(res.finished) return;
     invoke.call(this,req,res);
-    let file = './public'+req.url;
-    fs.readFile(file,(err,data)=>{
-      if(err){
-        handleError(res);
-      }else{
-        res.setHeader('Content-Type',getContentType(req.url));
-        res.write(data);
-        res.end();
-      }
-    })
   });
 };
 

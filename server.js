@@ -41,22 +41,32 @@ let getContentType=function(file){
   return mimeType[extension];
 }
 
-let readFile=function(file,res){
+let displayPage = function(req,res){
+  let url= req.url=='/' ? 'index.html' : req.url;
+  let file='./public'+url;
   fs.readFile(file,(err,data)=>{
-    if(err){
-      handleError(res);
-    }else{
-      res.setHeader('Content-Type',getContentType(req.url));
+    if(data){
+      res.setHeader('Content-Type',getContentType(url));
       res.write(data);
       res.end();
     }
-  });
+  })
+}
+
+let displayComments=function(res){
+  storedFeedbacks.forEach(function(feedback){
+    res.write(`<p><b>Name:</b>   ${feedback.name}
+              <br><b>comment:</b> ${feedback.coment}
+              <br><b>Date:</b>  ${feedback.date}</p>`);
+  })
+  res.write(`<a href="index.html">Home</a>`)
+  res.end();
 }
 
 let app = WebApp.create();
 app.use(logRequest);
 app.use(loadUser);
-app.use(getContentType);
+
 
 let handleError = function(res) {
   res.write("NOT FOUND");
@@ -66,15 +76,12 @@ let handleError = function(res) {
 
 let servePage=function(req,res){
   app(req,res);
-  let file = './public'+req.url;
   app.get(req.url,(req,res)=>{
-    let data="";
-    console.log(req.cookies.sessionid);
     if(!req.cookies.sessionid && req.url=='/guestBook.html'){
-      res.redirect('/login.html');
+      displayComments(res);
       return;
     }
-    readFile()
+    displayPage(req,res);
   });
 
   app.post(req.url,(req,res)=>{
@@ -88,8 +95,7 @@ let servePage=function(req,res){
     let sessionid = new Date().getTime();
     res.setHeader('Set-Cookie',`sessionid=${sessionid}`);
     user.sessionid = sessionid;
-    res.write(data);
-    res.end();
+    displayPage(req,res);
   });
 
   app.get('/logout.html',(req,res)=>{
