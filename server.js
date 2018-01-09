@@ -42,12 +42,14 @@ let getContentType=function(file){
 }
 
 let displayPage = function(req,res){
-  let url= req.url=='/' ? 'index.html' : req.url;
+  let url= req.url=='/' ? '/index.html' : req.url;
+  console.log(url);
   let file='./public'+url;
   fs.readFile(file,(err,data)=>{
     if(data){
       res.setHeader('Content-Type',getContentType(url));
       res.write(data);
+      if(url=='/guestBook.html') displayComments(res);
       res.end();
     }
   })
@@ -84,7 +86,7 @@ let servePage=function(req,res){
     displayPage(req,res);
   });
 
-  app.post(req.url,(req,res)=>{
+  app.post("/index.html",(req,res)=>{
     let user = registered_users.find(u=>u.userName==req.body.userName);
     console.log("========>",user);
     if(!user) {
@@ -97,6 +99,14 @@ let servePage=function(req,res){
     user.sessionid = sessionid;
     displayPage(req,res);
   });
+
+  app.post("/guestBook.html",(req,res)=>{
+    if(Object.keys(req.body).length!=0){
+      storedFeedbacks.push(req.body);
+      fs.writeFileSync('./data/feedback.json',JSON.stringify(storedFeedbacks));
+    }
+    displayPage(req,res);
+  })
 
   app.get('/logout.html',(req,res)=>{
     if(!req.cookies.sessionid){
