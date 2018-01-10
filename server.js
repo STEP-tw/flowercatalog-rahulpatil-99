@@ -4,8 +4,8 @@ const WebApp = require('./webapp');
 const timeStamp = require('./time.js').timeStamp;
 const fs = require('fs');
 
-let storedFeedbacks =fs.readFileSync('./data/feedback.json','utf8');
-storedFeedbacks = JSON.parse(storedFeedbacks);
+let comments =fs.readFileSync('./data/feedback.json','utf8');
+comments = JSON.parse(comments);
 let registered_users =[{userName:'rahul', name:'Rahul'},
                        {userName:'vish', name:'Vishal'}];
 let currentUser=undefined;
@@ -37,7 +37,8 @@ let getContentType=function(file){
     "css" : "text/css",
     "jpg" : "img/jpg",
     "gif" : "img/gif",
-    "js" : "text/javascript"
+    "js" : "text/javascript",
+    "pdf" : "application/pdf"
   }
   return mimeType[extension];
 }
@@ -57,18 +58,18 @@ let displayPage = function(req,res){
     }else{
       handleError(res);
     }
-  })
-}
+  });
+};
 
 let displayComments=function(res){
-  storedFeedbacks.forEach(function(feedback){
+  comments.forEach(function(feedback){
     res.write(`<p><b>Name:</b>   ${feedback.name}
-              <br><b>comment:</b> ${feedback.coment}
+              <br><b>comment:</b> ${feedback.comment}
               <br><b>Date:</b>  ${feedback.date}</p>`);
-  })
+  });
   res.write(`<h1><a href="index.html">Home</a></h1>`);
   res.end();
-}
+};
 
 let displayUserName=function(res){
   res.write(currentUser);
@@ -114,19 +115,21 @@ let servePage=function(req,res){
 
   app.post("/guestBook.html",(req,res)=>{
     if(Object.keys(req.body).length!=0){
-      storedFeedbacks.push(req.body);
-      fs.writeFileSync('./data/feedback.json',JSON.stringify(storedFeedbacks));
+      let feedback = req.body;
+      feedback.date=new Date().toLocaleString();
+      comments.push(feedback);
+      fs.writeFileSync('./data/feedback.json',JSON.stringify(comments));
     }
     displayPage(req,res);
-  })
+  });
 
   app.get('/logout.html',(req,res)=>{
     if(!req.cookies.sessionid){
       res.redirect('/login.html');
       return;
     }
-  res.setHeader('Set-Cookie',[`logInFailed=false; Expires=${new Date(1).toUTCString()}`,`sessionid=0; Expires=${new Date(1).toUTCString()}`]);
-  displayPage(req,res);
+    res.setHeader('Set-Cookie',[`logInFailed=false; Expires=${new Date(1).toUTCString()}`,`sessionid=0; Expires=${new Date(1).toUTCString()}`]);
+    displayPage(req,res);
   });
 }
 
