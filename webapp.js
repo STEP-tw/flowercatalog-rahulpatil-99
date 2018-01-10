@@ -7,6 +7,7 @@ const accumulate = (o,kv)=> {
   o[kv.key] = kv.value;
   return o;
 };
+
 const parseBody = text=> text && text.split('&').map(toKeyValue).reduce(accumulate,{}) || {};
 let redirect = function(path){
   console.log(`redirecting to ${path}`);

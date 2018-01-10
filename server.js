@@ -20,7 +20,6 @@ let logRequest = (req,res)=>{
     `COOKIES=> ${toS(req.cookies)}`,
     `BODY=> ${toS(req.body)}`,''].join('\n');
   fs.appendFile('request.log',text,()=>{});
-  console.log(`${req.method} ${req.url}`);
 }
 let loadUser = (req,res)=>{
   let sessionid = req.cookies.sessionid;
@@ -47,17 +46,17 @@ let displayPage = function(req,res){
   let url= req.url=='/' ? '/index.html' : req.url;
   let file='./public'+url;
   fs.readFile(file,(err,data)=>{
-    if(data){
-      res.setHeader('Content-Type',getContentType(url));
-      res.write(data);
-      if(url=='/guestBook.html') {
-        res.write(`<h2>logged in user is:${currentUser}</h2>`);
-        displayComments(res);
-      }
-      res.end();
-    }else{
+    if(err){
       handleError(res);
+      return;
     }
+    res.setHeader('Content-Type',getContentType(url));
+    res.write(data);
+    if(url=='/guestBook.html') {
+      res.write(`<h2>logged in user is:${currentUser}</h2>`);
+      displayComments(res);
+    }
+    res.end();
   });
 };
 
@@ -85,6 +84,12 @@ let handleError = function(res) {
   res.end();
 }
 
+const removeEncoding=function(body){
+  body.name=body.name.replace(/\+/g," ");
+  body.comment=body.comment.replace(/\+/g," ");
+  return body;
+}
+
 let servePage=function(req,res){
   app(req,res);
   app.get(req.url,(req,res)=>{
@@ -100,7 +105,6 @@ let servePage=function(req,res){
 
   app.post("/index.html",(req,res)=>{
     let user = registered_users.find(u=>u.userName==req.body.userName);
-    console.log("========>",user);
     if(!user) {
       res.setHeader('Set-Cookie',`logInFailed=true`);
       res.redirect('/login.html');
@@ -115,7 +119,7 @@ let servePage=function(req,res){
 
   app.post("/guestBook.html",(req,res)=>{
     if(Object.keys(req.body).length!=0){
-      let feedback = req.body;
+      let feedback = removeEncoding(req.body);
       feedback.date=new Date().toLocaleString();
       comments.push(feedback);
       fs.writeFileSync('./data/feedback.json',JSON.stringify(comments));
